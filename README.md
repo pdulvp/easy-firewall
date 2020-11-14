@@ -11,7 +11,7 @@ The most easiest firewall on earth and universe allowing to block an application
 ## Basic Features ##
 
 - Block an application. `GORGEOUS`
-- Unblock an application. `AWESOME`
+- Unblock an application.
 
 ## Upcoming `WHAOO` features ##
 
