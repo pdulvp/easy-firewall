@@ -48,21 +48,20 @@ let timeout = null;
 
 function hideModal() {
 	addClass(document.getElementById("modal-back"), "modal-hide");
-	addClass(document.getElementById("modal-font"), "modal-hide");
-	addClass(document.getElementById("modal-about"), "modal-hide");
-	addClass(document.getElementById("modal-license"), "modal-hide");
+	//addClass(document.getElementById("modal-about"), "modal-hide");
+	//addClass(document.getElementById("modal-license"), "modal-hide");
 	addClass(document.getElementById("modal-sponsor"), "modal-hide");
 }
 
 document.getElementById("modal-back").onclick = function(e) {
 	hideModal();
 }
-document.getElementById("modal-about").onclick = function(e) {
+/*document.getElementById("modal-about").onclick = function(e) {
 	hideModal();
 }
 document.getElementById("modal-license").onclick = function(e) {
 	hideModal();
-}
+}*/
 document.getElementById("modal-sponsor").onclick = function(e) {
 	hideModal();
 }
@@ -74,9 +73,9 @@ function showModal(e) {
 	removeClass(view, "modal-hide");
 }
 
-document.getElementById("link-about").onclick = showModal;
+//document.getElementById("link-about").onclick = showModal;
 document.getElementById("link-sponsor").onclick = showModal;
-document.getElementById("link-license").onclick = showModal;
+//document.getElementById("link-license").onclick = showModal;
 
 
 function updateWindow(event) {
@@ -90,6 +89,25 @@ function updateWindow(event) {
 window.addEventListener('scroll', updateWindow);
 window.onresize = updateWindow;
 
+
+var httpq = require("@pdulvp/httpquery");
+httpq.get("https://raw.githubusercontent.com/pdulvp/easy-firewall/site/README.md").then(e => {
+	
+
+	e = e.replace(/### ([^(###)\n]+) ###/g, "<h3>$1</h3>");
+	e = e.replace(/## ([^(##)\n]+) ##/g, "<h2>$1</h2>");
+	e = e.replace(/# ([^(#)\n]+) #/g, "<h1>$1</h1>");
+	e = e.replace(/`([a-zA-Z0-9]+)`/g, "<span class=\"span-whoa1\">$1</span>");
+	e = e.replace(/!\[([\w ]+)\]\(([^\)]+)\)/g, "<img title=\"$1\" src=\"$2\"/>");
+	e = e.replace(/\[([\w ]+)\]\(([^\)]+)\)/g, "<a title=\"$1\" href=\"$2\">$1</a>");
+	document.getElementById("main-section").innerHTML = e;
+	
+	colorize(document.getElementsByTagName("h1")[0]);
+	
+}).catch(e => {
+	console.log(e);
+});
+
 function colorize(element) {
 	let str=  element.innerText;
 	let result = "";
@@ -101,8 +119,7 @@ function colorize(element) {
 	element.innerHTML=result;
 }
 
-colorize(document.getElementById("whaoo"));
-colorize(document.getElementsByTagName("h1")[0]);
+//colorize(document.getElementById("whaoo"));
 
 function animate(element) {
 	window.setTimeout(function(e) {
@@ -114,4 +131,4 @@ function animate(element) {
 	}, 500);
 }
 
-animate(document.getElementById("alert2"));
+//animate(document.getElementById("alert2"));
