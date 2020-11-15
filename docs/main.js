@@ -91,9 +91,8 @@ window.onresize = updateWindow;
 
 
 var httpq = require("@pdulvp/httpquery");
-httpq.get("https://raw.githubusercontent.com/pdulvp/easy-firewall/site/README.md").then(e => {
+httpq.get("https://raw.githubusercontent.com/pdulvp/easy-firewall/master/README.md").then(e => {
 	
-
 	e = e.replace(/### ([^(###)\n]+) ###/g, "<h3>$1</h3>");
 	e = e.replace(/## ([^(##)\n]+) ##/g, "<h2>$1</h2>");
 	e = e.replace(/# ([^(#)\n]+) #/g, "<h1>$1</h1>");
