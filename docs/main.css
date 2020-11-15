@@ -13,9 +13,11 @@
   --link-color-hover: rgba(50, 150, 150, 0.8);
 }
 
-.header > div:first-child a {
+.header > div a {
   user-select: none;
   text-decoration: none;
+}
+.header > div:first-child a {
   color: black;
 }
 .header {
