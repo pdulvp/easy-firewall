@@ -1,0 +1,13 @@
+{
+  "name": "easy-firewall-site",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "dependencies": {
+    "@pdulvp/httpquery": "^2.0.0",
+    "@pdulvp/require": "^1.0.0"
+  },
+  "scripts": {},
+  "author": "pdulvp",
+  "license": "CC-BY-NC-ND-4.0"
+}
