@@ -48,20 +48,20 @@ let timeout = null;
 
 function hideModal() {
 	addClass(document.getElementById("modal-back"), "modal-hide");
-	//addClass(document.getElementById("modal-about"), "modal-hide");
-	//addClass(document.getElementById("modal-license"), "modal-hide");
+	addClass(document.getElementById("modal-about"), "modal-hide");
+	addClass(document.getElementById("modal-license"), "modal-hide");
 	addClass(document.getElementById("modal-sponsor"), "modal-hide");
 }
 
 document.getElementById("modal-back").onclick = function(e) {
 	hideModal();
 }
-/*document.getElementById("modal-about").onclick = function(e) {
+document.getElementById("modal-about").onclick = function(e) {
 	hideModal();
 }
 document.getElementById("modal-license").onclick = function(e) {
 	hideModal();
-}*/
+}
 document.getElementById("modal-sponsor").onclick = function(e) {
 	hideModal();
 }
@@ -73,9 +73,9 @@ function showModal(e) {
 	removeClass(view, "modal-hide");
 }
 
-//document.getElementById("link-about").onclick = showModal;
+document.getElementById("link-about").onclick = showModal;
 document.getElementById("link-sponsor").onclick = showModal;
-//document.getElementById("link-license").onclick = showModal;
+document.getElementById("link-license").onclick = showModal;
 
 
 function updateWindow(event) {
