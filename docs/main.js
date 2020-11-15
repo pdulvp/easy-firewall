@@ -98,7 +98,7 @@ httpq.get("https://raw.githubusercontent.com/pdulvp/easy-firewall/site/README.md
 	e = e.replace(/## ([^(##)\n]+) ##/g, "<h2>$1</h2>");
 	e = e.replace(/# ([^(#)\n]+) #/g, "<h1>$1</h1>");
 	e = e.replace(/`([a-zA-Z0-9]+)`/g, "<span class=\"span-whoa1\">$1</span>");
-	e = e.replace(/!\[([\w ]+)\]\(([^\)]+)\)/g, "<img title=\"$1\" src=\"$2\"/>");
+	e = e.replace(/!\[([\w ]+)\]\(([^\)]+)\)/g, "<img title=\"$1\" src=\"https://raw.githubusercontent.com/pdulvp/easy-firewall/master/$2\"/>");
 	e = e.replace(/\[([\w ]+)\]\(([^\)]+)\)/g, "<a title=\"$1\" href=\"$2\">$1</a>");
 	document.getElementById("main-section").innerHTML = e;
 	
