@@ -69,15 +69,16 @@ namespace Pdulvp.EasyFirewall
             // Put it in "Details" mode, create a column so that "Details" mode will work,
             // and set its theme so it will look like the one used by Explorer.
             listView1.View = View.Details;
-            listView1.Columns.Add("Name", 500);
+            listView1.Columns.Add("Name", 400);
             WinIcons.SetWindowTheme(listView1.Handle, "Explorer", null);
 
-            listView1.Columns.Add("Folder", 100);
+            listView1.Columns.Add("Folder", 200);
             listView1.Columns.Add("Product Name", 100);
             listView1.Columns.Add("Company", 100);
 
             loadRules();
             GroupBy(CurrentGroup);
+
         }
 
         private List<INetFwRule> getRules(INetFwPolicy2 policy)
@@ -90,6 +91,7 @@ namespace Pdulvp.EasyFirewall
 
             // Obtain a handle to the system image list.
             listView1.Items.Clear();
+            List<ListViewItem> items = new List<ListViewItem>();
 
             try
             {
@@ -104,7 +106,7 @@ namespace Pdulvp.EasyFirewall
                     if (!inversedRules.Exists(obj => obj == rule))
                     {
                         INetFwRule inverse = getInverse(rule, myRules);
-                        addItem(rule, inverse);
+                        items.Add(createItem(rule, inverse));
                         if (inverse != null)
                         {
                             inversedRules.Add(inverse);
@@ -119,6 +121,7 @@ namespace Pdulvp.EasyFirewall
             {
                 Console.WriteLine("Error deleting a Firewall rule");
             }
+            listView1.Items.AddRange(items.ToArray());
             System.Threading.Tasks.Task.Delay(2 * 1000).ContinueWith(ResetStatusLine);
 
         }
@@ -131,16 +134,10 @@ namespace Pdulvp.EasyFirewall
             }));
 
         }
-        private void addItem(INetFwRule rule, INetFwRule inverse)
+        private ListViewItem createItem(INetFwRule rule, INetFwRule inverse)
         {
             WinIcons.SHFILEINFO shfi = new WinIcons.SHFILEINFO();
-            IntPtr hSysImgList = WinIcons.SHGetFileInfo("",
-                                                             0,
-                                                             ref shfi,
-                                                             (uint)Marshal.SizeOf(shfi),
-                                                             WinIcons.SHGFI_SYSICONINDEX
-                                                              | WinIcons.SHGFI_SMALLICON);
-
+            
             IntPtr himl = WinIcons.SHGetFileInfo(rule.ApplicationName,
                                                                       0,
                                                                       ref shfi,
@@ -148,9 +145,8 @@ namespace Pdulvp.EasyFirewall
                                                                       WinIcons.SHGFI_DISPLAYNAME
                                                                         | WinIcons.SHGFI_SYSICONINDEX
                                                                         | WinIcons.SHGFI_SMALLICON);
-
+            
             ListViewItem item = new ListViewItem(getRuleReadableName(rule), shfi.iIcon);
-
             item.SubItems.Add(new ListViewSubItem(item, getRuleReadableProduct(rule)));
             try
             {
@@ -163,7 +159,14 @@ namespace Pdulvp.EasyFirewall
 
             }
             item.Tag = rule;
-            listView1.Items.Add(item);
+
+            if (!File.Exists(rule.ApplicationName))
+            {
+                item.ForeColor = Color.Orange;
+                item.Font = new Font(listView1.Font, listView1.Font.Style | FontStyle.Strikeout);
+            }
+
+            return item;
         }
 
         private void GroupBy(int i)
@@ -256,14 +259,9 @@ namespace Pdulvp.EasyFirewall
                 Policy.Rules.Add(firewallRule);
                 INetFwRule firewallRule2 = createInverseRule(firewallRule);
                 Policy.Rules.Add(firewallRule2);
-                addItem(firewallRule, firewallRule2);
+                listView1.Items.Add(createItem(firewallRule, firewallRule2));
             }
             GroupBy(CurrentGroup);
-        }
-
-        private void listView1_ItemDrag(object sender, ItemDragEventArgs e)
-        {
-
         }
 
         private INetFwRule getInverse(INetFwRule rule, List<INetFwRule> rules)
@@ -324,16 +322,6 @@ namespace Pdulvp.EasyFirewall
             return firewallRule;
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
-
         private void addToolStripMenuItem_Click(object sender, EventArgs e)
         {
             openFileDialog1.Multiselect = true;
@@ -351,7 +339,7 @@ namespace Pdulvp.EasyFirewall
                 Policy.Rules.Add(firewallRule);
                 INetFwRule firewallRule2 = createInverseRule(firewallRule);
                 Policy.Rules.Add(firewallRule2);
-                addItem(firewallRule, firewallRule2);
+                listView1.Items.Add(createItem(firewallRule, firewallRule2));
             }
             openFileDialog1.FileOk -= InsertFiles;
             GroupBy(CurrentGroup);
@@ -387,44 +375,6 @@ namespace Pdulvp.EasyFirewall
             GroupBy(CurrentGroup);
         }
 
-        private void repairToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                List<INetFwRule> CreatedRules = new List<INetFwRule>();
-                List<INetFwRule> Rules = getRules(Policy);
-                toolStripProgressBar1.Maximum = Rules.Count;
-                toolStripProgressBar1.Value = 0;
-                foreach (INetFwRule rule in Rules)
-                {
-                    string newName = getRuleReadableName(rule);
-                    if (rule.Name != newName)
-                    {
-                        rule.Name = newName;
-                    }
-                    if (rule.Grouping != GROUP)
-                    {
-                        rule.Grouping = GROUP;
-                    }
-                    
-                    INetFwRule inverse = getInverse(rule, Rules);
-                    if (inverse == null)
-                    {
-                        INetFwRule firewallRule = createInverseRule(rule);
-                        Policy.Rules.Add(firewallRule);
-                    }
-                    toolStripProgressBar1.Value++;
-                }
-            }
-
-            catch (Exception r)
-            {
-                Console.WriteLine(r);
-                Console.WriteLine("Error deleting a Firewall rule");
-            }
-            System.Threading.Tasks.Task.Delay(2 * 1000).ContinueWith(ResetStatusLine);
-        }
-
         private void refreshToolStripMenuItem_Click(object sender, EventArgs e)
         {
             loadRules();
@@ -440,25 +390,11 @@ namespace Pdulvp.EasyFirewall
             }
         }
 
-        private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
-        {
-
-        }
-
-        private void listView1_Resize(object sender, EventArgs e)
-        {
-
-        }
-
-        private void cccToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            System.Diagnostics.Process.Start("https://github.com/pdulvp/easy-firewall"); 
-        }
-
         private void toolStripMenuItem1_Click(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start("https://github.com/pdulvp/easy-firewall");
         }
+
     }
 
 }
