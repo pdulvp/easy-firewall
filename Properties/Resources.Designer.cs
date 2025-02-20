@@ -59,5 +59,122 @@ namespace Pdulvp.EasyFirewall.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Block a new application...
+        /// </summary>
+        internal static string addApplication {
+            get {
+                return ResourceManager.GetString("addApplication", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Advanced.
+        /// </summary>
+        internal static string advanced {
+            get {
+                return ResourceManager.GetString("advanced", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Company.
+        /// </summary>
+        internal static string company {
+            get {
+                return ResourceManager.GetString("company", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Delete.
+        /// </summary>
+        internal static string delete {
+            get {
+                return ResourceManager.GetString("delete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à File.
+        /// </summary>
+        internal static string file {
+            get {
+                return ResourceManager.GetString("file", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Folder.
+        /// </summary>
+        internal static string folder {
+            get {
+                return ResourceManager.GetString("folder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Github.
+        /// </summary>
+        internal static string github {
+            get {
+                return ResourceManager.GetString("github", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Name.
+        /// </summary>
+        internal static string name {
+            get {
+                return ResourceManager.GetString("name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Open Folder.
+        /// </summary>
+        internal static string openFolder {
+            get {
+                return ResourceManager.GetString("openFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Product Name.
+        /// </summary>
+        internal static string productName {
+            get {
+                return ResourceManager.GetString("productName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Refresh.
+        /// </summary>
+        internal static string refresh {
+            get {
+                return ResourceManager.GetString("refresh", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Sometimes when rules have been manually edited in Firewall settings, it may be good to refresh them.
+        /// </summary>
+        internal static string refreshDesc {
+            get {
+                return ResourceManager.GetString("refreshDesc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à EasyFirewall.
+        /// </summary>
+        internal static string title {
+            get {
+                return ResourceManager.GetString("title", resourceCulture);
+            }
+        }
     }
 }

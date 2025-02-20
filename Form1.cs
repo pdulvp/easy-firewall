@@ -8,6 +8,7 @@
  @author: pdulvp@laposte.net
 */
 using NetFwTypeLib;
+using Pdulvp.EasyFirewall.Properties;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,11 +16,13 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
@@ -39,6 +42,7 @@ namespace Pdulvp.EasyFirewall
         public Form1()
         {
             InitializeComponent();
+            Localize();
 
             Type tNetFwPolicy2 = Type.GetTypeFromProgID("HNetCfg.FwPolicy2");
             Policy = (INetFwPolicy2)Activator.CreateInstance(tNetFwPolicy2);
@@ -69,18 +73,30 @@ namespace Pdulvp.EasyFirewall
             // Put it in "Details" mode, create a column so that "Details" mode will work,
             // and set its theme so it will look like the one used by Explorer.
             listView1.View = View.Details;
-            listView1.Columns.Add("Name", 400);
+            listView1.Columns.Add(Resources.name, 400);
             WinIcons.SetWindowTheme(listView1.Handle, "Explorer", null);
 
-            listView1.Columns.Add("Folder", 200);
-            listView1.Columns.Add("Product Name", 100);
-            listView1.Columns.Add("Company", 100);
+            listView1.Columns.Add(Resources.folder, 200);
+            listView1.Columns.Add(Resources.productName, 100);
+            listView1.Columns.Add(Resources.company, 100);
 
             loadRules();
             GroupBy(CurrentGroup);
 
         }
 
+        private void Localize()
+        {
+            toolStripMenuItem1.Text = Resources.github;
+            advancedToolStripMenuItem.Text = Resources.advanced;
+            refreshToolStripMenuItem.Text = Resources.refresh;
+            refreshToolStripMenuItem.ToolTipText = Resources.refreshDesc;
+            addToolStripMenuItem.Text = Resources.addApplication;
+            fileToolStripMenuItem.Text = Resources.file;
+            Text = Resources.title;
+            deleteToolStripMenuItem.Text = Resources.delete;
+            openFolderToolStripMenuItem.Text = Resources.openFolder;
+        }
         private List<INetFwRule> getRules(INetFwPolicy2 policy)
         {
             return policy.Rules.Cast<INetFwRule>().ToList().FindAll(r => isMyRule(r));
@@ -88,7 +104,6 @@ namespace Pdulvp.EasyFirewall
 
         private void loadRules()
         {
-
             // Obtain a handle to the system image list.
             listView1.Items.Clear();
             List<ListViewItem> items = new List<ListViewItem>();
