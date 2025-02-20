@@ -31,7 +31,7 @@ using static System.Windows.Forms.ListViewItem;
 namespace Pdulvp.EasyFirewall
 {
 
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
         public static readonly String GROUP = "Easy Firewall";
 
@@ -39,7 +39,7 @@ namespace Pdulvp.EasyFirewall
 
         private INetFwPolicy2 Policy;
 
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
             Localize();
@@ -80,9 +80,7 @@ namespace Pdulvp.EasyFirewall
             listView1.Columns.Add(Resources.productName, 100);
             listView1.Columns.Add(Resources.company, 100);
 
-            loadRules();
-            GroupBy(CurrentGroup);
-
+            System.Threading.Tasks.Task.Delay(1000).ContinueWith(loadRules);
         }
 
         private void Localize()
@@ -102,43 +100,47 @@ namespace Pdulvp.EasyFirewall
             return policy.Rules.Cast<INetFwRule>().ToList().FindAll(r => isMyRule(r));
         }
 
-        private void loadRules()
+        private void loadRules(Task task)
         {
-            // Obtain a handle to the system image list.
-            listView1.Items.Clear();
-            List<ListViewItem> items = new List<ListViewItem>();
-
-            try
+            listView1.Invoke(new MethodInvoker(delegate
             {
-                List<INetFwRule> myRules = getRules(Policy);
+                listView1.Items.Clear();
 
-                toolStripProgressBar1.Maximum = myRules.Count;
-                toolStripProgressBar1.Value = 0;
+                // Obtain a handle to the system image list.
+                List<ListViewItem> items = new List<ListViewItem>();
 
-                List<INetFwRule> inversedRules = new List<INetFwRule>();
-                foreach (INetFwRule rule in myRules)
+                try
                 {
-                    if (!inversedRules.Exists(obj => obj == rule))
+                    List<INetFwRule> myRules = getRules(Policy);
+
+
+                    List<INetFwRule> inversedRules = new List<INetFwRule>();
+                    foreach (INetFwRule rule in myRules)
                     {
-                        INetFwRule inverse = getInverse(rule, myRules);
-                        items.Add(createItem(rule, inverse));
-                        if (inverse != null)
+                        if (!inversedRules.Exists(obj => obj == rule))
                         {
-                            inversedRules.Add(inverse);
+                            INetFwRule inverse = getInverse(rule, myRules);
+                            items.Add(createItem(rule, inverse));
+                            if (inverse != null)
+                            {
+                                inversedRules.Add(inverse);
+                            }
                         }
+                        toolStripProgressBar1.Value++;
                     }
-                    toolStripProgressBar1.Value++;
-                }
                
-            }
+                }
 
-            catch (Exception)
-            {
-                Console.WriteLine("Error deleting a Firewall rule");
-            }
-            listView1.Items.AddRange(items.ToArray());
-            System.Threading.Tasks.Task.Delay(2 * 1000).ContinueWith(ResetStatusLine);
+                catch (Exception e)
+                {
+                    Console.WriteLine("Error deleting a Firewall rule");
+                }
 
+                listView1.Items.AddRange(items.ToArray());
+                GroupBy(CurrentGroup);
+            }));
+
+            System.Threading.Tasks.Task.Delay(1000).ContinueWith(ResetStatusLine);
         }
 
         private void ResetStatusLine(Task obj)
@@ -175,13 +177,18 @@ namespace Pdulvp.EasyFirewall
             }
             item.Tag = rule;
 
-            if (!File.Exists(rule.ApplicationName))
+            if (isDeprecated(rule))
             {
                 item.ForeColor = Color.Orange;
                 item.Font = new Font(listView1.Font, listView1.Font.Style | FontStyle.Strikeout);
             }
 
             return item;
+        }
+
+        private bool isDeprecated(INetFwRule rule)
+        {
+            return !File.Exists(rule.ApplicationName);
         }
 
         private void GroupBy(int i)
@@ -392,7 +399,7 @@ namespace Pdulvp.EasyFirewall
 
         private void refreshToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            loadRules();
+            loadRules(null);
             GroupBy(CurrentGroup);
         }
 
