@@ -9,23 +9,11 @@
 */
 using NetFwTypeLib;
 using Pdulvp.EasyFirewall.Properties;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
-using System.Drawing;
-using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Xml.Serialization;
 using static System.Windows.Forms.ListViewItem;
 
 namespace Pdulvp.EasyFirewall
@@ -407,14 +395,14 @@ namespace Pdulvp.EasyFirewall
         {
             foreach (ListViewItem i in listView1.SelectedItems)
             {
-                INetFwRule rule = (INetFwRule)i.Tag;
+                INetFwRule rule = (INetFwRule) i.Tag;
                 Process.Start("explorer.exe", "/select, \"" + rule.ApplicationName + "\"");
             }
         }
 
         private void toolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/pdulvp/easy-firewall");
+            Process.Start(new ProcessStartInfo { FileName = "https://github.com/pdulvp/easy-firewall", UseShellExecute = true });
         }
 
     }
