@@ -68,6 +68,8 @@ namespace Pdulvp.EasyFirewall
                 listView1.Invoke(new MethodInvoker(delegate
                 {
                     listView1.Items.Clear();
+                    addToolStripMenuItem.Enabled = false;
+                    refreshToolStripMenuItem.Enabled = false;
                 }));
             };
             FwRules.RulesLoadingAdded += (s, e) =>
@@ -84,6 +86,8 @@ namespace Pdulvp.EasyFirewall
                     listView1.Items.AddRange(FwRules.Rules.Select(r => createItem(r)).ToArray());
                     GroupBy(CurrentGroup);
                     ResetStatusLine(null);
+                    addToolStripMenuItem.Enabled = true;
+                    refreshToolStripMenuItem.Enabled = true;
                 }));
             };
 
