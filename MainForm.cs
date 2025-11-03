@@ -74,10 +74,14 @@ namespace Pdulvp.EasyFirewall
             };
             FwRules.RulesLoadingAdded += (s, e) =>
             {
-                listView1.Invoke(new MethodInvoker(delegate
+                if (toolStripProgressBar1.Value != e && e % 10 == 0)
                 {
-                    toolStripProgressBar1.Value++;
-                }));
+
+                    listView1.Invoke(new MethodInvoker(delegate
+                    {
+                        toolStripProgressBar1.Value = e;
+                    }));
+                }
             };
             FwRules.RulesLoadingCompleted += (s, e) =>
             {
@@ -88,6 +92,7 @@ namespace Pdulvp.EasyFirewall
                     ResetStatusLine(null);
                     addToolStripMenuItem.Enabled = true;
                     refreshToolStripMenuItem.Enabled = true;
+                    toolStripMenuItem2.Enabled = FwRules.Rules.Any(x => x.Inconsistent);
                 }));
             };
 
@@ -105,6 +110,7 @@ namespace Pdulvp.EasyFirewall
             Text = Resources.title;
             deleteToolStripMenuItem.Text = Resources.delete;
             openFolderToolStripMenuItem.Text = Resources.openFolder;
+            toolStripMenuItem2.Text = Resources.fixInconsistencies;
         }
 
         private void ResetStatusLine(Task obj)
@@ -115,7 +121,7 @@ namespace Pdulvp.EasyFirewall
         private ListViewItem createItem(FwRule rule)
         {
             WinIcons.SHFILEINFO shfi = new WinIcons.SHFILEINFO();
-            
+
             IntPtr himl = WinIcons.SHGetFileInfo(rule.ApplicationName,
                                                                       0,
                                                                       ref shfi,
@@ -123,7 +129,7 @@ namespace Pdulvp.EasyFirewall
                                                                       WinIcons.SHGFI_DISPLAYNAME
                                                                         | WinIcons.SHGFI_SYSICONINDEX
                                                                         | WinIcons.SHGFI_SMALLICON);
-            
+
             ListViewItem item = new ListViewItem(rule.ReadableName, shfi.iIcon);
             item.SubItems.Add(new ListViewSubItem(item, rule.ReadableProduct));
             item.SubItems.Add(new ListViewSubItem(item, rule.ProductName));
@@ -147,7 +153,7 @@ namespace Pdulvp.EasyFirewall
             {
                 if (i == 0)
                 {
-                    item.Group = getGroup(((FwRule) item.Tag).ApplicationName);
+                    item.Group = getGroup(((FwRule)item.Tag).ApplicationName);
                 }
                 else if (i < item.SubItems.Count)
                 {
@@ -226,7 +232,7 @@ namespace Pdulvp.EasyFirewall
 
             foreach (ListViewItem i in listView1.SelectedItems)
             {
-                FwRule rule = (FwRule) i.Tag;
+                FwRule rule = (FwRule)i.Tag;
                 FwRules.Remove(rule);
                 listView1.Items.Remove(i);
             }
@@ -247,7 +253,7 @@ namespace Pdulvp.EasyFirewall
         {
             foreach (ListViewItem i in listView1.SelectedItems)
             {
-                FwRule rule = (FwRule) i.Tag;
+                FwRule rule = (FwRule)i.Tag;
                 Process.Start("explorer.exe", "/select, \"" + rule.ApplicationName + "\"");
             }
         }
@@ -257,6 +263,14 @@ namespace Pdulvp.EasyFirewall
             Process.Start(new ProcessStartInfo { FileName = "https://github.com/pdulvp/easy-firewall", UseShellExecute = true });
         }
 
+        private void toolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            foreach (FwRule rule in FwRules.Rules.FindAll(x => x.Inconsistent))
+            {
+                FwRules.Fix(rule);
+            }
+            FwRules.load();
+        }
     }
 
 }

@@ -1,14 +1,18 @@
-﻿using NetFwTypeLib;
-using System;
-using System.Collections.Generic;
+﻿/**
+ This Code is published under the terms and conditions of the CC-BY-NC-ND-4.0
+ (https://creativecommons.org/licenses/by-nc-nd/4.0)
+ 
+ Please contribute to the current project.
+ 
+ SPDX-License-Identifier: CC-BY-NC-ND-4.0
+ @author: pdulvp@laposte.net
+*/
+using NetFwTypeLib;
 using System.Data;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
+using System.Diagnostics.Eventing.Reader;
+using System.DirectoryServices.ActiveDirectory;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using static System.Windows.Forms.ListViewItem;
 
 namespace Pdulvp.EasyFirewall
 {
@@ -26,15 +30,19 @@ namespace Pdulvp.EasyFirewall
 
         internal INetFwRule inverse;
 
+        public List<INetFwRule> allRules = new List<INetFwRule>();
+
         internal bool loadedInfo = false;
 
         internal string productName = null;
 
         internal string companyName = null;
+        public bool Inconsistent { get { return allRules.Count > 0 || inverse == null; } }
 
         public string ApplicationName { get { return rule.ApplicationName; } }
 
         public string ReadableName { get { return FwUtil.getRuleReadableName(rule); } }
+
         public string ReadableProduct { get { return getRuleReadableProduct(rule); } }
 
         private void loadInfo()
@@ -103,6 +111,7 @@ namespace Pdulvp.EasyFirewall
     internal class FwRules
     {
         public static readonly String GROUP = "Easy Firewall";
+
         private INetFwPolicy2 Policy;
 
         public FwRules()
@@ -113,13 +122,15 @@ namespace Pdulvp.EasyFirewall
 
         private List<FwRule> rules;
 
+        private int expectedRules;
+
         public List<FwRule> Rules { get { return rules; } }
 
         public event System.EventHandler RulesLoadingStarted;
 
         public event System.EventHandler RulesLoadingCompleted;
 
-        public event System.EventHandler<FwRule> RulesLoadingAdded;
+        public event System.EventHandler<int> RulesLoadingAdded;
 
         protected virtual void OnRulesLoadingStarted()
         {
@@ -130,72 +141,69 @@ namespace Pdulvp.EasyFirewall
             if (RulesLoadingCompleted != null) RulesLoadingCompleted(this, EventArgs.Empty);
         }
 
-        protected virtual void OnRulesLoadingAdded(FwRule rule)
+        protected virtual void OnRulesLoadingAdded()
         {
-            if (RulesLoadingAdded != null) RulesLoadingAdded(this, rule);
+            if (RulesLoadingAdded != null) RulesLoadingAdded(this, (int) Math.Floor(Rules.Count * 100.0 / expectedRules));
         }
-
-
-
 
         public void load()
         {
-            System.Threading.Tasks.Task.Delay(100).ContinueWith(loadRules);
+            System.Threading.Tasks.Task.Delay(1000).ContinueWith(loadRules);
         }
 
         private List<INetFwRule> getRules()
         {
-            return Policy.Rules.Cast<INetFwRule>().ToList().FindAll(r => isMyRule(r));
+            return Policy.Rules.Cast<INetFwRule>().ToList().FindAll(isMyRule);
         }
 
         private bool isMyRule(INetFwRule rule)
         {
-            if (rule.Grouping != null && (rule.Grouping.StartsWith(GROUP)))
+            if (rule.Grouping != null && rule.Grouping.StartsWith(GROUP))
             {
                 return true;
             }
             return false;
         }
+
         private void loadRules(Task task)
         {
-            OnRulesLoadingStarted();
-            rules = new List<FwRule>();
-
-            // Obtain a handle to the system image list.
 
             try
-                {
-                    List<INetFwRule> myRules = getRules();
+            {
+                List<INetFwRule> myRules = getRules();
+                expectedRules = myRules.Count;
+                OnRulesLoadingStarted();
+                rules = new List<FwRule>();
 
-                    List<INetFwRule> inversedRules = new List<INetFwRule>();
-                    foreach (INetFwRule rule in myRules)
+                Dictionary<string, FwRule> myHashMap = new Dictionary<string, FwRule>();
+                foreach (INetFwRule rule in myRules)
+                {
+                    if (myHashMap.ContainsKey(rule.ApplicationName))
                     {
-                        if (!inversedRules.Exists(obj => obj == rule))
+                        if (myHashMap[rule.ApplicationName].inverse == null && rule.Direction != myHashMap[rule.ApplicationName].rule.Direction)
                         {
-                            INetFwRule inverse = getInverse(rule, myRules);
-                            FwRule newRule = Create(rule, inverse);
-                            Rules.Add(newRule);
-                            if (inverse != null)
-                            {
-                                inversedRules.Add(inverse);
-                            }
-                            OnRulesLoadingAdded(newRule);
+                            myHashMap[rule.ApplicationName].inverse = rule;
+                        }
+                        else
+                        {
+                            myHashMap[rule.ApplicationName].allRules.Add(rule);
                         }
                     }
+                    else
+                    {
+                        FwRule newRule = Create(rule, null);
+                        myHashMap.Add(rule.ApplicationName, newRule);
+                    }
+                    OnRulesLoadingAdded();
                 }
-
-                catch (Exception e)
-                {
-                    Console.WriteLine("Error deleting a Firewall rule");
-                }
-
-
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error deleting a Firewall rule");
+            }
 
             OnRulesLoadingCompleted();
         }
-
-        
-
 
         private INetFwRule createRule(String path)
         {
@@ -212,11 +220,6 @@ namespace Pdulvp.EasyFirewall
             firewallRule.RemoteAddresses = "*";
             firewallRule.Grouping = GROUP;
             return firewallRule;
-        }
-
-        private INetFwRule getInverse(INetFwRule rule, List<INetFwRule> rules)
-        {
-            return rules.Find(r => r.Direction != rule.Direction && r.ApplicationName == rule.ApplicationName);
         }
 
         private INetFwRule createInverseRule(INetFwRule rule)
@@ -272,6 +275,10 @@ namespace Pdulvp.EasyFirewall
                 {
                     Policy.Rules.Remove(rule.inverse.Name);
                 }
+                foreach (INetFwRule r in rule.allRules)
+                {
+                    Policy.Rules.Remove(r.Name);
+                }
                 Rules.Remove(rule);
             }
             catch (Exception eee)
@@ -296,10 +303,17 @@ namespace Pdulvp.EasyFirewall
 
         internal FwRule Create(INetFwRule nrule, INetFwRule inverse)
         {
-            FwRule rule = new FwRule();;
+            FwRule rule = new FwRule();
             rule.rule = nrule;
             rule.inverse = inverse;
+            Rules.Add(rule);
             return rule;
+        }
+
+        internal void Fix(FwRule rule)
+        {
+            Remove(rule);
+            Create(rule.rule.ApplicationName);
         }
     }
 }

@@ -132,6 +132,9 @@
   <data name="file" xml:space="preserve">
     <value>File</value>
   </data>
+  <data name="fixInconsistencies" xml:space="preserve">
+    <value>Fix Inconsistencies</value>
+  </data>
   <data name="folder" xml:space="preserve">
     <value>Folder</value>
   </data>

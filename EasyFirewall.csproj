@@ -35,9 +35,6 @@
 
   <ItemGroup>
     <Content Include="out.ico" />
-	<Content Include="appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
 	

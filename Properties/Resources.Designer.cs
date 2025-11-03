@@ -106,6 +106,15 @@ namespace Pdulvp.EasyFirewall.Properties {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à Fix Inconsistencies.
+        /// </summary>
+        internal static string fixInconsistencies {
+            get {
+                return ResourceManager.GetString("fixInconsistencies", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à Folder.
         /// </summary>
         internal static string folder {

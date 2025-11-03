@@ -132,6 +132,9 @@
   <data name="file" xml:space="preserve">
     <value>ファイル</value>
   </data>
+  <data name="fixInconsistencies" xml:space="preserve">
+    <value>不一致を修正する</value>
+  </data>
   <data name="folder" xml:space="preserve">
     <value>フォルダ</value>
   </data>
